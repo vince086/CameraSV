@@ -10,19 +10,40 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.ImageView;
+
 
 public class MainActivity extends ActionBarActivity {
 
+	Button openb;
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        openb = (Button) findViewById(R.id.button1);
+        
+        //Listen for button push 
+        openb.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               open();
+            }
+         });
     }
     
+    //Open Camera intent 
+    public void open(){
+        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent, 0);
+     }
     
-    
-    
-    
+ 
     
     
     

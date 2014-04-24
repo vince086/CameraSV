@@ -6,9 +6,21 @@
     tools:context="com.example.camerasv.MainActivity"
     tools:ignore="MergeRootFrame" >
 
+ <Button
+     android:id="@+id/button1"
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_centerHorizontal="true"
+     android:layout_centerVertical="true"
+     android:text="Open the Camera" />
+
  <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+     android:layout_width="wrap_content"
+     android:layout_height="wrap_content"
+     android:layout_alignParentTop="true"
+     android:layout_centerHorizontal="true"
+     android:layout_marginTop="75dp"
+     android:textSize="18sp"
+     android:text="@string/hello" />
  
  </RelativeLayout>

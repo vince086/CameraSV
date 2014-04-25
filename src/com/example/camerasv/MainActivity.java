@@ -4,7 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.io.FileOutputStream;
 
+import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera;
+import android.content.Context;
+import android.hardware.Camera;
+import android.hardware.Camera.PictureCallback;
+import android.util.Log;
+import android.widget.Toast;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -30,9 +39,11 @@ public class MainActivity extends ActionBarActivity {
 
 	Button openb;
 	
-	String mCurrentPhotoPath;
-	 
-	static final int REQUEST_TAKE_PHOTO = 1;
+	  private static final String TAG = "CallCamera";
+	  private static final int CAPTURE_IMAGE_ACTIVITY_REQ = 0;
+	  Uri fileUri = null;
+	  ImageView photoImage = null;
+
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,76 +55,56 @@ public class MainActivity extends ActionBarActivity {
         openb.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-               //open();
-            	dispatchTakePictureIntent();
+            //Code goes here to be triggered by button 
+            	Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                File file = getOutputPhotoFile();
+                fileUri = Uri.fromFile(getOutputPhotoFile());
+                i.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+                startActivityForResult(i, CAPTURE_IMAGE_ACTIVITY_REQ );
+                
             }
          });
     }
-    
-    /*
-    //Open Camera intent 
-    public void open(){
-        Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivityForResult(intent, 0);
-     }
-    */
- 
    
-    //Used for creating unique name for file of picture
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-            imageFileName,  /* prefix */
-            ".jpg",         /* suffix */
-            storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
-        return image;
-    }
-    
-    //Used to take picture
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-  
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        Uri.fromFile(photoFile));
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-            }
-        }
-    }
     
     
-    //Adds picture to galery 
-    private void galleryAddPic() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        this.sendBroadcast(mediaScanIntent);
-    }
+    private File getOutputPhotoFile() {
+    	  File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), getPackageName());
+    	  if (!directory.exists()) {
+    	    if (!directory.mkdirs()) {
+    	      Log.e(TAG, "Failed to create storage directory.");
+    	      return null;
+    	    }
+    	  }
+    	  String timeStamp = new SimpleDateFormat("yyyMMdd_HHmmss", Locale.UK).format(new Date());
+    	  return new File(directory.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
+    	}
+    
+    
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	  if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQ) {
+    	    if (resultCode == RESULT_OK) {
+    	      Uri photoUri = null;
+    	      if (data == null) {
+    	        // A known bug here! The image should have saved in fileUri
+    	        Toast.makeText(this, "Image saved successfully", Toast.LENGTH_LONG).show();
+    	        photoUri = fileUri;
+    	      } else {
+    	        photoUri = data.getData();
+    	        Toast.makeText(this, "Image saved successfully in: " + data.getData(), Toast.LENGTH_LONG).show();
+    	      }
+    	      // showPhoto(photoUri);
+    	    } else if (resultCode == RESULT_CANCELED) {
+    	      Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show();
+    	    } else {
+    	      Toast.makeText(this, "Callout for image capture failed!", Toast.LENGTH_LONG).show();
+    	    }
+    	  }
+    	}
     
     
     
-    
-    
-    
-    
-    
+    //-----------Don't touch stuff below here----------------------------
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {   
         // Inflate the menu; this adds items to the action bar if it is present.
